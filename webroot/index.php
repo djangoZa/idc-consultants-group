@@ -30,41 +30,69 @@ foreach ($json->floorplans as $floorPlan)
 	}
 }
 
-var_dump($rows);
-
 include 'PHPExcel.php';
 
 /** PHPExcel_Writer_Excel2007 */
 include 'PHPExcel/Writer/Excel2007.php';
 
-// Create new PHPExcel object
-echo date('H:i:s') . " Create new PHPExcel object\n";
-$objPHPExcel = new PHPExcel();
+// define the columns
+$columns = range("A","Z");
 
-// Set properties
-echo date('H:i:s') . " Set properties\n";
-$objPHPExcel->getProperties()->setCreator("Maarten Balliauw");
-$objPHPExcel->getProperties()->setLastModifiedBy("Maarten Balliauw");
-$objPHPExcel->getProperties()->setTitle("Office 2007 XLSX Test Document");
-$objPHPExcel->getProperties()->setSubject("Office 2007 XLSX Test Document");
-$objPHPExcel->getProperties()->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.");
+// Create new PHPExcel object
+$objPHPExcel = new PHPExcel();
+$objPHPExcel->getProperties()->setTitle("Archibus");
 
 // Add some data
-echo date('H:i:s') . " Add some data\n";
 $objPHPExcel->setActiveSheetIndex(0);
-$objPHPExcel->getActiveSheet()->SetCellValue('A1', 'Hello');
-$objPHPExcel->getActiveSheet()->SetCellValue('B2', 'world!');
-$objPHPExcel->getActiveSheet()->SetCellValue('C1', 'Hello');
-$objPHPExcel->getActiveSheet()->SetCellValue('D2', 'world!');
+
+//Add the headings
+$columnNames = array_keys(array_pop($rows));
+foreach($columnNames as $columnId => $columnName)
+{
+    $objPHPExcel->getActiveSheet()->SetCellValue($columns[$columnId] . '1', ucfirst($columnName));
+}
+
+//Add the rows
+foreach ($rows as $rowId => $row)
+{
+    foreach($row as $columnId => $value)
+    {
+    	$columnIndex = array_search($columnId, array_keys($row));
+    	$cellIndex = $columns[$columnIndex] . ($rowId + 2);
+    	switch($columnId)
+    	{
+    		case 'pointerReference':
+    			$value = (String) str_pad($value, 3, '0', STR_PAD_LEFT);
+    			break;
+    	    case 'compliance':
+    	    	//$objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getAlignment()->setWrapText(true);
+    	    	break;
+    	    case 'images':
+    	        $objDrawing = new PHPExcel_Worksheet_Drawing();
+				$objDrawing->setPath('./uploads/tablet1/thumb.jpg');
+				$objDrawing->setCoordinates($cellIndex);
+				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+
+				$objDrawing = new PHPExcel_Worksheet_Drawing();
+				$objDrawing->setPath('./uploads/tablet1/thumb2.png');
+				$objDrawing->setCoordinates($cellIndex);
+				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+    	        break;
+    		case 'section':
+    		    $value = ucfirst(str_replace("_"," ",$value));
+    		    break;
+    	}
+
+    	//write value
+    	$objPHPExcel->getActiveSheet()->SetCellValue($cellIndex, $value);
+    }
+}
 
 // Rename sheet
-echo date('H:i:s') . " Rename sheet\n";
 $objPHPExcel->getActiveSheet()->setTitle('Simple');
 		
 // Save Excel 2007 file
-echo date('H:i:s') . " Write to Excel2007 format\n";
 $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
 $objWriter->save('/tmp/spreadsheet.xlsx');
 
-// Echo done
-echo date('H:i:s') . " Done writing file.\r\n";
+echo "done";
