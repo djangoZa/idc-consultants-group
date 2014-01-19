@@ -1,7 +1,8 @@
 <?php
-require_once(dirname(__FILE__) . '/lib/bootstrap.php');
+require_once('/vagrant/webroot/lib/bootstrap.php');
 
-$jsonText = file_get_contents(dirname(__FILE__) . '/uploads/data.txt');
+$basePath = '/vagrant/webroot/uploads/tablet1/';
+$jsonText = file_get_contents($basePath . '/data.txt');
 $json = json_decode($jsonText);
 $rows = array();
 
@@ -68,15 +69,13 @@ foreach ($rows as $rowId => $row)
     	    	//$objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getAlignment()->setWrapText(true);
     	    	break;
     	    case 'images':
-    	        $objDrawing = new PHPExcel_Worksheet_Drawing();
-				$objDrawing->setPath('./uploads/tablet1/thumb.jpg');
-				$objDrawing->setCoordinates($cellIndex);
-				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
-
-				$objDrawing = new PHPExcel_Worksheet_Drawing();
-				$objDrawing->setPath('./uploads/tablet1/thumb2.png');
-				$objDrawing->setCoordinates($cellIndex);
-				$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+                foreach($value as $image)
+                {
+                    $objDrawing = new PHPExcel_Worksheet_Drawing();
+                    $objDrawing->setPath($basePath . '/' . basename($image));
+                    $objDrawing->setCoordinates($cellIndex);
+                    $objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
+                }    
     	        break;
     		case 'section':
     		    $value = ucfirst(str_replace("_"," ",$value));
@@ -93,6 +92,6 @@ $objPHPExcel->getActiveSheet()->setTitle('Simple');
 		
 // Save Excel 2007 file
 $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
-$objWriter->save('/tmp/spreadsheet.xlsx');
+$objWriter->save($basePath . '/spreadsheet.xlsx');    
 
 echo "done";
