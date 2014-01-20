@@ -10,8 +10,7 @@ $pendingPath = $basePath . "/Pending";
 
 //poll dropbox for changes
 $cursor = null;
-$count = 0;
-while($count < 2)
+while(true)
 {
 	$folderMetadata = $dbxClient->getMetadataWithChildren($pendingPath);
 	$tablets = $folderMetadata['contents'];
@@ -24,7 +23,7 @@ while($count < 2)
 		foreach($outputs as $output)
 		{
 			//move contents to processing folder
-			$folderName = basename($output['path']) . "-" . uniqid();
+			$folderName = basename($output['path']) . "_" . uniqid();
 			$processingFolder = $basePath . "/Processing/" . $folderName;
 			$dbxClient->move($output['path'], $processingFolder);
 
@@ -157,6 +156,5 @@ while($count < 2)
 	}
 
 	//wait for 5 minutes
-	sleep(10);
-	$count+=1;
+	sleep(30);
 }
