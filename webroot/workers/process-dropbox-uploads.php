@@ -1,5 +1,5 @@
 <?php
-require_once "../lib/bootstrap.php";
+require_once dirname(__FILE__) . "/../lib/bootstrap.php";
 include 'PHPExcel.php';
 include 'PHPExcel/Writer/Excel2007.php';
 

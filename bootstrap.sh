@@ -15,3 +15,6 @@ chown www-data:www-data /tmp/idc-consultants-group
 
 #RESTART APACHE
 service apache2 restart
+
+#START THE WORKERS
+php /vagrant/webroot/workers/process-dropbox-uploads.php
