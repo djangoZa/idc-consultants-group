@@ -11,10 +11,10 @@ apt-get install -y apache2 php5 curl php5-curl
 rm -rf /var/www
 ln -s /vagrant/webroot /var/www
 mkdir /tmp/idc-consultants-group
-chown www-data:www-data /tmp/idc-consultants-group
+chmod -R 1777 /tmp
 
 #RESTART APACHE
 service apache2 restart
 
 #START THE WORKERS
-php /vagrant/webroot/workers/process-dropbox-uploads.php &
+#nohup php /vagrant/webroot/workers/process-dropbox-uploads.php &
