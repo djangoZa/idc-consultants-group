@@ -17,4 +17,4 @@ chmod -R 1777 /tmp
 service apache2 restart
 
 #START THE WORKERS
-#nohup php /vagrant/webroot/workers/process-dropbox-uploads.php &
+nohup php /vagrant/webroot/workers/process-dropbox-uploads.php &
