@@ -63,16 +63,16 @@ while(true)
 							        foreach($answers as $answer)
 							        {
 								        $rows[] = array(
-								        	'floorPlan' => $floorPlan->getName(),
-								        	'pointerReference' => $marker->getId(),
-								        	'section' => $marker->getSection(),
-								        	'onsiteImages' => $answer->getPhotos(),
-								        	'sansCompliance' => $answer->getFeedback(),
-								        	'comments' => $answer->getComment(),
-								        	'sansRecommendations' => '',
-								        	'optionalRecommendations' => '',
-								        	'qsSansCosting' => '',
-											'qsOptionalCosting' => ''
+								        	'Floor_Plan' => $floorPlan->getName(),
+								        	'Pointer_Reference' => $marker->getId(),
+								        	'Section' => $marker->getSection(),
+								        	'Onsite_Images' => $answer->getPhotos(),
+								        	'SANS_Compliance' => $answer->getFeedback(),
+								        	'Comments' => $answer->getComment(),
+								        	'SANS_Recommendations' => '',
+								        	'Optional_Recommendations' => '',
+								        	'QS_SANS_Costing' => '',
+											'QS_Optional_Costing' => ''
 								        );	
 							        }
 								}
@@ -93,7 +93,7 @@ while(true)
 							foreach($columnNames as $columnId => $columnName)
 							{
 								$cellIndex = $columns[$columnId] . '1';
-							    $objPHPExcel->getActiveSheet()->SetCellValue($cellIndex, ucfirst($columnName));
+							    $objPHPExcel->getActiveSheet()->SetCellValue($cellIndex, str_replace('_', ' ', $columnName));
 							    $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getFont()->setBold(true);
 							}
 
@@ -106,10 +106,14 @@ while(true)
 							    	$cellIndex = $columns[$columnIndex] . ($rowId + 2);
 							    	switch($columnId)
 							    	{
-							    		case 'pointerReference':
+							    		case 'Pointer_Reference':
 							    			$value = (String) str_pad($value, 3, '0', STR_PAD_LEFT);
 							    			break;
-							    	    case 'onsiteImages':
+							    	    case 'Onsite_Images':
+
+							    	        //set the initil offset
+							    	        $offset = 0;
+
 							                foreach($value as $key => $image)
 							                {
 							                	try{
@@ -122,11 +126,16 @@ while(true)
 													$fileMetadata = $dbxClient->getFile($imageFilePath, $fileHandle);
 													fclose($fileHandle);
 
+													//set the image offset
+													$size = getimagesize($tmpImageFilePath);
+													$height = $size[1];
+													$offset = ($key == 0)? 0 : $offset + $height + 2;
+
 													//embed the image
 													$objDrawing = new PHPExcel_Worksheet_Drawing();
 								                    $objDrawing->setPath($tmpImageFilePath);
 								                    $objDrawing->setCoordinates($cellIndex);
-								                    $objDrawing->setOffsetY(($key > 0) ? 165 * $key : 0);
+								                    $objDrawing->setOffsetY(($key > 0) ? $offset : 0);
 								                    $objDrawing->setResizeProportional(true);
 								                    $objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 
@@ -136,7 +145,7 @@ while(true)
 							                	}
 							                }    
 							    	        break;
-							    		case 'section':
+							    		case 'Section':
 							    		    $value = ucfirst(str_replace("_"," ",$value));
 							    		    break;
 							    	}
