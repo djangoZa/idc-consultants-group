@@ -1,7 +1,5 @@
 <?php
-namespace IDC;
-
-class Tablet_Answer
+class IDC_Tablet_Answer
 {
     private $_photos;
     private $_feedback;

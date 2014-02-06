@@ -21,7 +21,7 @@ class IDC_Tablet_FloorPlan
 
     	foreach($this->_markers as $marker)
     	{
-            $out[] = new Marker($marker);
+            $out[] = new IDC_Tablet_Marker($marker);
     	}
 
     	return $out;

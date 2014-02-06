@@ -16,10 +16,28 @@ class Container
 			case 'IDC_Tablet_FloorPlan':
 				$out = self::_getIDC_Tablet_FloorPlan($options);
 			    break;
+			case 'IDC_Tablet_FloorPlan_Service':
+				$out = self::_getIDC_Tablet_FloorPlan_Service();
+			    break;
+			case 'IDC_Tablet_FloorPlan_Canvas':
+				$out = self::_getIDC_Tablet_FloorPlan_Canvas($options);
+			    break;
 			default:
 				break;
 		}
 
+		return $out;
+	}
+
+	private function _getIDC_Tablet_FloorPlan_Canvas(Array $options)
+	{
+		$out = new IDC_Tablet_FloorPlan_Canvas($options[0]);
+		return $out;
+	}
+
+	private function _getIDC_Tablet_FloorPlan_Service()
+	{
+		$out = new IDC_Tablet_FloorPlan_Service();
 		return $out;
 	}
 

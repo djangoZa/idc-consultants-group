@@ -14,6 +14,27 @@ class IDC_Tablet_Dropbox_Service
     	$this->_client = $client;
     }
 
+    public function getOutputsBySiteId($siteId)
+    {
+        $out = array();
+        $path = $this->_dropboxProcessedTabletUploadsPath . "/$siteId/Data";
+        $outputs = $this->_getFolderContents($path);
+
+        if (!empty($outputs))
+        {
+            foreach($outputs as $folder)
+            {
+                $folder = new IDC_Tablet_Dropbox_Folder($folder);
+                $output = new IDC_Tablet_Output($this);
+                $output->setFolder($folder);
+
+                $out[] = $output;
+            }
+        }
+
+        return $out;
+    }
+
     public function hasPendingTabletOutputs()
     {
         $out = false;
@@ -69,8 +90,8 @@ class IDC_Tablet_Dropbox_Service
     public function movePendingFolderToSiteFolder(IDC_Tablet_Dropbox_Folder $folder, $siteId)
     {
         $this->_createSiteFolder($siteId);
-        $this->_setProcessedFolder($folder);
-        $this->_movePendingFolderToProcessedFolder($folder);
+        $this->_createDataDumpFolder($siteId);
+        $this->_movePendingFolderToDataDumpFolder($folder);
     }
 
     public function movePendingFolderToCorruptedFolder(IDC_Tablet_Dropbox_Folder $folder)
@@ -79,15 +100,22 @@ class IDC_Tablet_Dropbox_Service
         $this->_client->move($folder->getPath(), $this->_dropboxCorruptedTabletOutputPath . '/' . $folderName);
     }
 
-    private function _movePendingFolderToProcessedFolder(IDC_Tablet_Dropbox_Folder $folder)
+    private function _movePendingFolderToDataDumpFolder(IDC_Tablet_Dropbox_Folder $folder)
     {
+        $this->_setProcessedFolderPath($folder);
         $this->_client->move($folder->getPath(), $this->_processedFolderPath);
     }
 
-    private function _setProcessedFolder(IDC_Tablet_Dropbox_Folder $folder)
+    private function _setProcessedFolderPath(IDC_Tablet_Dropbox_Folder $folder)
     {
         $folderName = basename($folder->getPath() . "_" . uniqid());
-        $this->_processedFolderPath = $this->_siteFolderPath . '/' . $folderName;
+        $this->_processedFolderPath = $this->_siteFolderPath . '/Data/' . $folderName;
+    }
+
+    private function _createDataDumpFolder($siteId)
+    {
+        //create data directory
+        $this->_client->createFolder($this->_siteFolderPath . '/Data');
     }
 
     private function _createSiteFolder($siteId)

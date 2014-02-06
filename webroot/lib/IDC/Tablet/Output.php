@@ -31,6 +31,18 @@ class IDC_Tablet_Output
 		return $id;
 	}
 
+	public function getFloorplans()
+	{
+		$out = array();
+
+		foreach ($this->_output->floorplans as $floorplan)
+		{
+			$out[] = Container::get('IDC_Tablet_FloorPlan', array($floorplan));
+		}
+
+		return $out;
+	}
+
 	private function _setOutput()
 	{
 		$json = $this->_dropboxService->getFileContents($this->_folder->getDataFilePath());
