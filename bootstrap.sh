@@ -13,6 +13,3 @@ chmod -R 1777 /tmp
 
 #RESTART APACHE
 service apache2 restart
-
-#START THE WORKERS
-nohup php /vagrant/webroot/workers/move-pending-dropbox-uploads.php &
