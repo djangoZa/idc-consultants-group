@@ -40,13 +40,17 @@ while(true)
 
             	} else {
 
-            		echo "ERROR: Cant find site id for tablet output ($folderIndex)\n";
+            		echo "NOTICE: Cant find site id for tablet output ($folderIndex)\n";
             		
             		$tabletDropboxService->movePendingFolderToCorruptedFolder($pendingFolder);
 
-            		echo "ERROR: Moved tablet output to currupted folder\n";
+            		echo "NOTICE: Moved tablet output to currupted folder\n";
 
             	}
+            } else {
+
+            	echo "NOTICE: Pending tablet output ($folderIndex) not ready for processing\n";
+
             }
 		}
 	}
