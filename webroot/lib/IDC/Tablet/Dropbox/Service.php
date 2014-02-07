@@ -14,6 +14,43 @@ class IDC_Tablet_Dropbox_Service
     	$this->_client = $client;
     }
 
+    public function hasAllRequiredFloorplanImages($siteId, Array $floorplans)
+    {
+        $out = array('result' => true);
+        $floorplanImageNames = $this->_getFloorplanImageNames($floorplans);
+        $paths = array();
+
+        //construct all possible floorplan image paths
+        foreach($floorplanImageNames as $floorplanImageName)
+        {
+            $floorplanImageNameParts = explode('.', $floorplanImageName);
+            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . '.' . $floorplanImageNameParts[1];
+            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . '_Large.' . $floorplanImageNameParts[1];
+        }
+
+        //verify all floorplan images exist
+        foreach ($paths as $path)
+        {
+            $result = $this->_client->getMetaData($path);
+            if (empty($result))
+            {
+                $out['result'] = false;
+                $out['messages'][] = "Floorplan at path ($path) is missing.";
+            }
+        }
+
+        return $out;
+    }
+
+    public function createFloorplanFolderSkeleton($siteId)
+    {
+        $basePath = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId;
+        $this->_client->createFolder($basePath . '/Floorplans');
+        $this->_client->createFolder($basePath . '/Floorplans/Original');
+        $this->_client->createFolder($basePath . '/Floorplans/Overlayed');
+        $this->_client->createFolder($basePath . '/Floorplans/Overlayed/Backups');
+    }
+
     public function getOutputsBySiteId($siteId)
     {
         $out = array();
@@ -87,6 +124,22 @@ class IDC_Tablet_Dropbox_Service
         return $out;
     }
 
+    public function getFloorplanImageDimensions($siteId, $floorplanImageName)
+    {
+        $path = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageName;
+        $tmpDataFilePath = $this->_tmpFolder . "/image-" . uniqid();
+        $fileHandle = fopen($tmpDataFilePath, "w+b");
+        $fileMetadata = $this->_client->getFile($path, $fileHandle);
+        fclose($fileHandle);
+
+        $result = getimagesize($tmpDataFilePath);
+
+        return array(
+            'width' => $result[0],
+            'height' => $result[1]
+        );
+    }
+
     public function movePendingFolderToSiteFolder(IDC_Tablet_Dropbox_Folder $folder, $siteId)
     {
         $this->_createSiteFolder($siteId);
@@ -132,5 +185,17 @@ class IDC_Tablet_Dropbox_Service
         $folderMetadata = $this->_client->getMetadataWithChildren($folderPath);
         $out = $folderMetadata['contents'];
         return $out;
+    }
+
+    private function _getFloorplanImageNames(Array $floorplans)
+    {
+        $out = array();
+
+        foreach($floorplans as $floorplan)
+        {
+            $out[] = $floorplan->getImageName();
+        }
+
+        return array_unique($out);
     }
 }

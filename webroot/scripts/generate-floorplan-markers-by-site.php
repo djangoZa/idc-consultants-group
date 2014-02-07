@@ -14,60 +14,54 @@ echo "OK: Start\n";
 echo "OK: Fetching tablet outputs for site id ($siteId). This may take a few minutes...\n";
 
 $outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
-$coordinatesPerFloor = array();
+//$outputs = array(1);
 
 if (!empty($outputs))
 {
-	echo "OK: Got tablet outputs for site id ($siteId)\n";
 
+	echo "OK: Got tablet outputs.\n";
+
+	//Fetch the all the floorplans across all data files
 	$floorplans = $tabletFloorPlanService->getFloorPlansFromOutputs($outputs);
-
+	//file_put_contents("/tmp/blob", serialize($floorplans));
+	//$floorplans = unserialize(file_get_contents("/tmp/blob"));
 	echo "OK: Got floorplans for site id ($siteId)\n";
 
-	//Get all the coordinates per floor
-	foreach ($floorplans as $floorplan)
+	//Create the floorplan skeleton
+	$tabletDropboxService->createFloorplanFolderSkeleton($siteId);
+	echo "OK: Created skeleton folder structure for floorplans.\n";
+
+	//Verify all floorplan images have been uploaded
+	echo "OK: Verifying that all required floorplan images have been uploaded.\n";
+	$hasAllRequiredFloorplanImages = $tabletDropboxService->hasAllRequiredFloorplanImages($siteId, $floorplans);
+
+	if ($hasAllRequiredFloorplanImages['result'] == true)
 	{
+		echo "OK: All floorplan images have been uploaded.\n";
 
-		$markers = $floorplan->getMarkers();
+		//Construct the floorplan canvas
+		$tabletFloorPlanCanvas = Container::get('IDC_Tablet_FloorPlan_Canvas', array($tabletDropboxService, $floorplans, $siteId));
+		echo "OK: Flooplan canvas constructed.\n";
 
-		if(!empty($markers))
-		{
-			$coordinates = array();
-
-			foreach ($markers as $marker)
-			{
-				$coordinatesPerFloor[$floorplan->getName()][] = $marker->getCoordinates();
-			}
-		}
-
-	}
-
-	//Generate a floorplan canvas
-	if (!empty($coordinatesPerFloor))
-	{
-		echo "OK: Found coordinates for site id ($siteId)\n";
-
-		foreach ($coordinatesPerFloor as $floor => $coordinates)
-		{
-			//Instantiate the floorplan canvas
-			$tabletFloorPlanCanvas = Container::get('IDC_Tablet_FloorPlan_Canvas', array($tabletDropboxService));
-			$tabletFloorPlanCanvas->setFloor($floor);
-			$tabletFloorPlanCanvas->setCoordinates($coordinates);
-
-			//Generate an image from the floorplan canvas
-			var_dump($tabletFloorPlanCanvas);
-		}
+		//Generate a JPG representation of the floorplan canvas
+		$tabletFloorPlanCanvas->run();
+		echo "OK: Generated floorplan images with overlayed markers\n";
 
 	} else {
 
-		echo "NOTICE: Did not find any coordinates for site id ($siteId)\n";
+		foreach ($hasAllRequiredFloorplanImages['messages'] as $message)
+		{
+			echo "NOTICE: $message\n";
+		}
+		
+		echo "NOTICE: Please upload to Dropbox and re-run this script.\n";
 
 	}
 
 } else {
 
-	echo "ERROR: Cant find data for site id ($siteId)\n";
+	echo "ERROR: Cant find any uploaded data\n";
 
 }
 
-echo "OK: End\n";
+echo "OK: End\n\n";
