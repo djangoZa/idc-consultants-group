@@ -14,6 +14,31 @@ class IDC_Tablet_Dropbox_Service
     	$this->_client = $client;
     }
 
+    public function getFloorplanImagePathsByFloorplan(IDC_Tablet_Floorplan $floorplan)
+    {
+        $out = array();
+        $versions = array('', '_Large');
+
+        foreach ($versions as $version)
+        {
+            $siteId = $floorplan->getSiteId();
+
+            $floorplanImageName = $floorplan->getImageName();
+            $floorplanImageNameParts = explode(".", $floorplanImageName);
+            
+            $path = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . $version . '.' . $floorplanImageNameParts[1];
+            
+            $tmpDataFilePath = $this->_tmpFolder . "/image-" . uniqid();
+            $fileHandle = fopen($tmpDataFilePath, "w+b");
+            $fileMetadata = $this->_client->getFile($path, $fileHandle);
+            fclose($fileHandle);
+
+            $out[$version] = $tmpDataFilePath;
+        }
+
+        return $out;
+    }
+
     public function hasAllRequiredFloorplanImages($siteId, Array $floorplans)
     {
         $out = array('result' => true);

@@ -2,7 +2,9 @@
 class IDC_Tablet_FloorPlan
 {
 	private $_name;
+    private $_siteId;
     private $_imageName;
+    private $_imagePaths = array();
     private $_markers;
     
     public function __construct($options = array())
@@ -10,7 +12,14 @@ class IDC_Tablet_FloorPlan
     	$this->_name = $options->name;
         $this->_imageName = basename($options->path);
     	$this->_markers = $options->markers;
-        
+    }
+
+    public function getSiteId()
+    {
+        $name = $this->getName();
+        $parts = explode("_", $name);
+        $id = $parts[0];
+        return $id;
     }
 
     public function getName()
@@ -33,5 +42,21 @@ class IDC_Tablet_FloorPlan
     	}
 
     	return $out;
+    }
+
+    public function getImage($key)
+    {
+        $out = array();
+
+        $imagePath = $this->_imagePaths[$key];
+        $image = imagecreatefromjpeg($imagePath);
+        $out = $image;
+
+        return $out;
+    }
+
+    public function setImagePaths(Array $imagePaths)
+    {
+        $this->_imagePaths = $imagePaths;
     }
 }

@@ -3,47 +3,50 @@ class IDC_Tablet_Floorplan_Canvas
 {
 	private $_dropboxService;
 	private $_floorplans;
-	private $_floorplanDimensions;
+	private $_floorplanImages;
 
-	public function __construct(IDC_Tablet_Dropbox_Service $dropboxService, Array $floorplans, $siteId)
+	public function __construct(IDC_Tablet_Dropbox_Service $dropboxService, Array $floorplans)
 	{
-		$this->_siteId = $siteId;
 		$this->_dropboxService = $dropboxService;
 		$this->_floorplans = $floorplans;
-		$this->_floorplanDimensions = $this->_getFloorplanDimensions();
 	}
 
-	public function run()
+	public function setFloorplanImages()
 	{
-		
-	}
-
-	private function _getFloorplanDimensions()
-	{
-		$out = array();
-		$floorplanImageNames = $this->_getUniqueFloorplanNames();
-
-		foreach($floorplanImageNames as $floorplanImageName)
+		foreach($this->_floorplans as $floorplan)
 		{
-			$floorplanImageNameParts = explode('.', $floorplanImageName);
-			$out[$floorplanImageName]['mobile'] = $this->_dropboxService->getFloorplanImageDimensions($this->_siteId, $floorplanImageNameParts[0] . '.' . $floorplanImageNameParts[1]);
-			$out[$floorplanImageName]['large'] = $this->_dropboxService->getFloorplanImageDimensions($this->_siteId, $floorplanImageNameParts[0] . '_Large.' . $floorplanImageNameParts[1]);
+			$this->_floorplanImages[$floorplan->getName()] = $floorplan->getImage('_Large');
+		}
+	}
+
+	public function pinMarkersToFloorplans()
+	{
+		foreach($this->_floorplans as $floorplan)
+		{
+			$markers = $floorplan->getMarkers();
+			$markerIconWidth = 56;
+			$markerIconHeight = 56;
+			foreach($markers as $marker)
+			{
+				$backgroundImage = $this->_floorplanImages[$floorplan->getName()];
+				$markerIcon = $marker->getIcon();
+				$markerCoordinates = $marker->getCoordinates();
+				imagecopy(
+					$backgroundImage,
+					$markerIcon,
+					$markerCoordinates['x'] - ($markerIconWidth / 2),
+					$markerCoordinates['y'] - ($markerIconWidth / 2),
+					0,
+					0,
+					$markerIconWidth,
+					$markerIconHeight
+				);
+			}
 		}
 
-		return $out;
-	}
-
-	private function _getUniqueFloorplanNames()
-	{
-		$out = array();
-
-		foreach ($this->_floorplans as $floorplan)
+		foreach($this->_floorplanImages as $version => $image)
 		{
-			$out[] = $floorplan->getImageName();
+			imagejpeg($image, "/vagrant/floorplan-" . $version);
 		}
-
-		$out = array_unique($out);
-
-		return $out;
 	}
 }

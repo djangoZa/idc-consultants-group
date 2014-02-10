@@ -18,4 +18,19 @@ class IDC_Tablet_Floorplan_Service
 
 		return $out;
 	}
+
+	public function generateAndSaveOverlayedFloorplans(IDC_Tablet_Floorplan_Canvas $canvas)
+	{
+		$canvas->setFloorplanImages();
+		$canvas->pinMarkersToFloorplans();
+/*
+		$floorplans = $canvas->getFloorplans();
+
+		foreach ($floorplans as $floorplan)
+		{
+			$markers = $floorplan->getMarkers();
+			
+		}
+*/
+	}
 }

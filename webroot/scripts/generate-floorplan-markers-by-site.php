@@ -11,10 +11,10 @@ $tabletFloorPlanService = Container::get('IDC_Tablet_FloorPlan_Service');
 
 echo "OK: Start\n";
 
-echo "OK: Fetching tablet outputs for site id ($siteId). This may take a few minutes...\n";
+echo "OK: Fetching tablet outputs for site id ($siteId). This may take a few moments...\n";
 
-$outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
-//$outputs = array(1);
+//$outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
+$outputs = array(1);
 
 if (!empty($outputs))
 {
@@ -22,21 +22,21 @@ if (!empty($outputs))
 	echo "OK: Got tablet outputs.\n";
 
 	//Fetch the all the floorplans across all data files
-	$floorplans = $tabletFloorPlanService->getFloorPlansFromOutputs($outputs);
+	//$floorplans = $tabletFloorPlanService->getFloorPlansFromOutputs($outputs);
 	//file_put_contents("/tmp/blob", serialize($floorplans));
-	//$floorplans = unserialize(file_get_contents("/tmp/blob"));
+	$floorplans = unserialize(file_get_contents("/tmp/blob"));
 	echo "OK: Got floorplans for site id ($siteId)\n";
 
 	//Create the floorplan skeleton
-	$tabletDropboxService->createFloorplanFolderSkeleton($siteId);
+	//$tabletDropboxService->createFloorplanFolderSkeleton($siteId);
 	echo "OK: Created skeleton folder structure for floorplans.\n";
 
 	//Verify all floorplan images have been uploaded
 	echo "OK: Verifying that all required floorplan images have been uploaded.\n";
-	$hasAllRequiredFloorplanImages = $tabletDropboxService->hasAllRequiredFloorplanImages($siteId, $floorplans);
+	//$hasAllRequiredFloorplanImages = $tabletDropboxService->hasAllRequiredFloorplanImages($siteId, $floorplans);
 
-	if ($hasAllRequiredFloorplanImages['result'] == true)
-	{
+	//if ($hasAllRequiredFloorplanImages['result'] == true)
+	//{
 		echo "OK: All floorplan images have been uploaded.\n";
 
 		//Construct the floorplan canvas
@@ -44,9 +44,9 @@ if (!empty($outputs))
 		echo "OK: Flooplan canvas constructed.\n";
 
 		//Generate a JPG representation of the floorplan canvas
-		$tabletFloorPlanCanvas->run();
+		$tabletFloorPlanService->generateAndSaveOverlayedFloorplans($tabletFloorPlanCanvas);
 		echo "OK: Generated floorplan images with overlayed markers\n";
-
+/*
 	} else {
 
 		foreach ($hasAllRequiredFloorplanImages['messages'] as $message)
@@ -57,7 +57,7 @@ if (!empty($outputs))
 		echo "NOTICE: Please upload to Dropbox and re-run this script.\n";
 
 	}
-
+*/
 } else {
 
 	echo "ERROR: Cant find any uploaded data\n";
