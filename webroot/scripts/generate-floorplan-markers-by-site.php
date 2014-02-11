@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ERROR);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
 require_once dirname(__FILE__) . "/../lib/bootstrap.php";
 
@@ -13,29 +13,30 @@ echo "OK: Start\n";
 
 echo "OK: Fetching tablet outputs for site id ($siteId). This may take a few minutes...\n";
 
-//$outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
+$outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
 //file_put_contents("/tmp/outputs", serialize($outputs));
-$outputs = unserialize(file_get_contents("/tmp/outputs"));
+//$outputs = unserialize(file_get_contents("/tmp/outputs"));
 
 if (!empty($outputs))
 {
 	echo "OK: Got tablet outputs.\n";
 
 	echo "OK: Fetching floorplan and marker data from outputs. This may take a few minutes...\n";
+	
 	//Fetch the all the floorplans across all data files
 	$floorplans = $tabletFloorPlanService->getFloorPlansFromOutputs($outputs);
-    file_put_contents("/tmp/blob", serialize($floorplans));
+    //file_put_contents("/tmp/floorplans", serialize($floorplans));
 	//$floorplans = unserialize(file_get_contents("/tmp/blob"));
 	echo "OK: Got floorplan and marker data.\n";
 
 	//Create the floorplan skeleton
-	//$tabletDropboxService->createFloorplanFolderSkeleton($siteId);
+	$tabletDropboxService->createFloorplanFolderSkeleton($siteId);
 	echo "OK: Created skeleton folder structure for floorplans.\n";
 
 	//Verify all floorplan images have been uploaded
 	echo "OK: Verifying that all required floorplan images have been uploaded.\n";
-	//$hasAllRequiredFloorplanImages = $tabletDropboxService->hasAllRequiredFloorplanImages($siteId, $floorplans);
-	$hasAllRequiredFloorplanImages = array('result' => true);
+	$hasAllRequiredFloorplanImages = $tabletDropboxService->hasAllRequiredFloorplanImages($siteId, $floorplans);
+	//$hasAllRequiredFloorplanImages = array('result' => true);
 
 	if ($hasAllRequiredFloorplanImages['result'] == true)
 	{
