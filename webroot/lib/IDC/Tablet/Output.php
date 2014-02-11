@@ -22,7 +22,7 @@ class IDC_Tablet_Output
 
 		if (!empty($this->_output->floorplans))
 		{
-			$floorplan = array_pop($this->_output->floorplans);
+			$floorplan = Container::get('IDC_Tablet_FloorPlan', array(array_pop($this->_output->floorplans)));
 			$id = $floorplan->getSiteId();
 		}
 		
@@ -38,7 +38,7 @@ class IDC_Tablet_Output
 			//make new tablet floorplan object
 			$tabletFloorplan = Container::get('IDC_Tablet_FloorPlan', array($floorplan));
 			
-			//get the tmp path the the floorplan image
+			//get the tmp path to the floorplan image
 			$floorplanImagePaths = $this->_dropboxService->getFloorplanImagePathsByFloorplan($tabletFloorplan);
 			
 			//set the tmp path to the floorplan image

@@ -17,7 +17,7 @@ class IDC_Tablet_Dropbox_Folder
 		$modifiedTimestamp = strtotime($this->_modified);
 		$currentTimestamp = time();
 		$differenceInSeconds = $currentTimestamp - $modifiedTimestamp;
-		$tenMinutesinSeconds = 600;
+		$tenMinutesinSeconds = 1;
 
 		if($differenceInSeconds > $tenMinutesinSeconds)
 		{

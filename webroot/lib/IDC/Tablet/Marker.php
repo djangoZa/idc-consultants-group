@@ -11,16 +11,20 @@ class IDC_Tablet_Marker
 
     public function __construct($options = array()) 
     {
-    	$this->_id = $options->id;
     	$this->_section = $options->section;
     	$this->_answers = $options->answers;
         $this->_x = $options->x;
         $this->_y = $options->y;
     }
 
+    public function setId($value)
+    {
+        $this->_id = $value;
+    }
+
     public function getId()
     {
-    	return $this->_id;
+    	return sprintf("%02s", $this->_id);
     }
 
     public function getAnswers()
@@ -70,23 +74,31 @@ class IDC_Tablet_Marker
             case 'external_circulation':
             case 'parking':
             case 'inactive':
-                $markerIconPath = $this->_markerIconsPath . '/' . $this->getSection() . '.jpg';
+                $markerIconPath = $this->_markerIconsPath . '/' . $this->getSection() . '.png';
                 break;
             default:
-                $markerIconPath = $this->_markerIconsPath . '/default.jpg';
+                $markerIconPath = $this->_markerIconsPath . '/default.png';
                 break;
         }
 
-        $iconImage = imagecreatefromjpeg($markerIconPath);
-
-        //Set the X and Y coordinates of the text
-        $textXCoord = (imagesx($iconImage) / 2) - 12;
-        $textYCoord = (imagesy($iconImage) / 2) + 10;
+        $iconImage = imagecreatefrompng($markerIconPath);
 
         //Print the section number to the image
         $colour = imagecolorallocate($iconImage, 255, 255, 255);
         $sectionNumber = $this->getId();
-        imagettftext($iconImage, 20, 0, $textXCoord, $textYCoord, $colour, $this->_markerFontPath, $sectionNumber);
+
+        //Calculate the texts coordinates to be centre
+        $font = 5;
+        $fontWidth = ImageFontWidth($font);
+        $fontHeight = ImageFontHeight($font);
+
+        $textWidth = $fontWidth * strlen($sectionNumber);
+        $textHeight = $fontHeight;
+
+        $textXCoord = ceil((56 - $textWidth) / 2);
+        $textYCoord = ceil((56 - $textHeight) / 2);
+
+        ImageString($iconImage, $font, $textXCoord, $textYCoord, $sectionNumber, $colour);
 
         return $iconImage;
     }

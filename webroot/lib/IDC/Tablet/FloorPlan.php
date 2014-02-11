@@ -14,10 +14,15 @@ class IDC_Tablet_FloorPlan
     	$this->_markers = $options->markers;
     }
 
+    public function setMarkers(Array $markers)
+    {
+        $this->_markers = $markers;
+    }
+
     public function getSiteId()
     {
         $name = $this->getName();
-        $parts = explode("_", $name);
+        $parts = explode("-", $name);
         $id = $parts[0];
         return $id;
     }
@@ -38,7 +43,13 @@ class IDC_Tablet_FloorPlan
 
     	foreach($this->_markers as $marker)
     	{
-            $out[] = new IDC_Tablet_Marker($marker);
+            if($marker instanceof IDC_Tablet_Marker)
+            {
+                $out[] = $marker;
+            } else {
+                $out[] = new IDC_Tablet_Marker($marker);    
+            }
+            
     	}
 
     	return $out;

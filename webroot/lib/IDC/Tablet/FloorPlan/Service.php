@@ -4,6 +4,7 @@ class IDC_Tablet_Floorplan_Service
 	public function getFloorPlansFromOutputs(Array $outputs)
 	{
 		$out = array();
+		$markerId = 0;
 
 		foreach ($outputs as $output)
 		{
@@ -11,6 +12,23 @@ class IDC_Tablet_Floorplan_Service
 
 			foreach ($floorplans as $floorplan)
 			{
+				//ensure that each markers id will run sequentially
+				$tmpMarkers = array();
+				$markers = $floorplan->getMarkers();
+				if (!empty($markers))
+				{
+					foreach($markers as $key => $marker)
+					{
+						$markerId += 1;
+						$marker->setId($markerId);
+						$tmpMarkers[] = $marker;
+					}
+
+					//set the tmpmarkers to the floorplan
+					$floorplan->setMarkers($tmpMarkers);
+				}
+
+				//Append to the output array
 				$out[] = $floorplan;
 			}
 
@@ -23,14 +41,6 @@ class IDC_Tablet_Floorplan_Service
 	{
 		$canvas->setFloorplanImages();
 		$canvas->pinMarkersToFloorplans();
-/*
-		$floorplans = $canvas->getFloorplans();
-
-		foreach ($floorplans as $floorplan)
-		{
-			$markers = $floorplan->getMarkers();
-			
-		}
-*/
+		$canvas->saveFloorplansToDropbox();
 	}
 }

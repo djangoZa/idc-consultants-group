@@ -14,10 +14,21 @@ class IDC_Tablet_Dropbox_Service
     	$this->_client = $client;
     }
 
+    public function uploadFloorplanImage($localPath, $siteId)
+    {
+        $fileHandle = fopen($localPath, "rb");
+        $path = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . "/Floorplans/Overlayed/" . basename($localPath);
+        
+        try{
+            $this->_client->uploadFile($path, Dropbox\WriteMode::add(), $fileHandle);
+            fclose($fileHandle);
+        } catch(Exception $e) {}
+    }
+
     public function getFloorplanImagePathsByFloorplan(IDC_Tablet_Floorplan $floorplan)
     {
         $out = array();
-        $versions = array('', '_Large');
+        $versions = array('', '_L');
 
         foreach ($versions as $version)
         {
@@ -50,7 +61,7 @@ class IDC_Tablet_Dropbox_Service
         {
             $floorplanImageNameParts = explode('.', $floorplanImageName);
             $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . '.' . $floorplanImageNameParts[1];
-            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . '_Large.' . $floorplanImageNameParts[1];
+            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . '_L.' . $floorplanImageNameParts[1];
         }
 
         //verify all floorplan images exist
@@ -89,7 +100,6 @@ class IDC_Tablet_Dropbox_Service
                 $folder = new IDC_Tablet_Dropbox_Folder($folder);
                 $output = new IDC_Tablet_Output($this);
                 $output->setFolder($folder);
-
                 $out[] = $output;
             }
         }
@@ -178,6 +188,28 @@ class IDC_Tablet_Dropbox_Service
         $this->_client->move($folder->getPath(), $this->_dropboxCorruptedTabletOutputPath . '/' . $folderName);
     }
 
+    private function _sortContentsByPath($array, $key)
+    {
+        $sorter = array();
+        $ret = array();
+        reset($array);
+
+        foreach ($array as $ii => $va)
+        {
+            $sorter[$ii] = $va[$key];
+        }
+
+        arsort($sorter);
+        foreach ($sorter as $ii => $va)
+        {
+            $ret[$ii] = $array[$ii];
+        }
+
+        $array = $ret;
+
+        return $array;
+    }
+
     private function _movePendingFolderToDataDumpFolder(IDC_Tablet_Dropbox_Folder $folder)
     {
         $this->_setProcessedFolderPath($folder);
@@ -208,7 +240,7 @@ class IDC_Tablet_Dropbox_Service
     private function _getFolderContents($folderPath)
     {
         $folderMetadata = $this->_client->getMetadataWithChildren($folderPath);
-        $out = $folderMetadata['contents'];
+        $out = $this->_sortContentsByPath($folderMetadata['contents'], 'path');
         return $out;
     }
 

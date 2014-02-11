@@ -15,7 +15,8 @@ class IDC_Tablet_Floorplan_Canvas
 	{
 		foreach($this->_floorplans as $floorplan)
 		{
-			$this->_floorplanImages[$floorplan->getName()] = $floorplan->getImage('_Large');
+			$this->_floorplanImages[$floorplan->getName()]['image'] = $floorplan->getImage('_L');
+			$this->_floorplanImages[$floorplan->getName()]['siteId'] = $floorplan->getSiteId();
 		}
 	}
 
@@ -28,14 +29,14 @@ class IDC_Tablet_Floorplan_Canvas
 			$markerIconHeight = 56;
 			foreach($markers as $marker)
 			{
-				$backgroundImage = $this->_floorplanImages[$floorplan->getName()];
+				$backgroundImage = $this->_floorplanImages[$floorplan->getName()]['image'];
 				$markerIcon = $marker->getIcon();
 				$markerCoordinates = $marker->getCoordinates();
 				imagecopy(
 					$backgroundImage,
 					$markerIcon,
-					$markerCoordinates['x'] - ($markerIconWidth / 2),
-					$markerCoordinates['y'] - ($markerIconWidth / 2),
+					($markerCoordinates['x'] * 1.99) - ($markerIconWidth / 2),
+					($markerCoordinates['y'] * 1.99) - ($markerIconHeight / 2),
 					0,
 					0,
 					$markerIconWidth,
@@ -44,9 +45,19 @@ class IDC_Tablet_Floorplan_Canvas
 			}
 		}
 
-		foreach($this->_floorplanImages as $version => $image)
+		
+	}
+
+	public function saveFloorplansToDropbox()
+	{
+		foreach($this->_floorplanImages as $version => $values)
 		{
-			imagejpeg($image, "/vagrant/floorplan-" . $version);
+			//write the floorplan to the tmp directory
+			$tmpFloorplanImagePath = "/tmp/idc-consultants-group/" . $version . '.jpg';
+			imagejpeg($values['image'], $tmpFloorplanImagePath);
+
+			//upload the floorplan to dropbox
+			$this->_dropboxService->uploadFloorplanImage($tmpFloorplanImagePath, $values['siteId']);
 		}
 	}
 }
