@@ -55,7 +55,7 @@ class IDC_Tablet_FloorPlan
     	return $out;
     }
 
-    public function getImage($key)
+    public function getImage($key = '')
     {
         $out = array();
 

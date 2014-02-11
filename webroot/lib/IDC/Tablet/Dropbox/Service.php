@@ -28,7 +28,7 @@ class IDC_Tablet_Dropbox_Service
     public function getFloorplanImagePathsByFloorplan(IDC_Tablet_Floorplan $floorplan)
     {
         $out = array();
-        $versions = array('', '_L');
+        $versions = array('');
 
         foreach ($versions as $version)
         {

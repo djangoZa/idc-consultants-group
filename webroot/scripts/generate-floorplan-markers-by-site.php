@@ -14,7 +14,7 @@ echo "OK: Start\n";
 echo "OK: Fetching tablet outputs for site id ($siteId). This may take a few minutes...\n";
 
 $outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
-//file_put_contents("/tmp/outputs", serialize($outputs));
+file_put_contents("/tmp/outputs", serialize($outputs));
 //$outputs = unserialize(file_get_contents("/tmp/outputs"));
 
 if (!empty($outputs))
@@ -25,8 +25,8 @@ if (!empty($outputs))
 	
 	//Fetch the all the floorplans across all data files
 	$floorplans = $tabletFloorPlanService->getFloorPlansFromOutputs($outputs);
-    //file_put_contents("/tmp/floorplans", serialize($floorplans));
-	//$floorplans = unserialize(file_get_contents("/tmp/blob"));
+    file_put_contents("/tmp/floorplans", serialize($floorplans));
+	//$floorplans = unserialize(file_get_contents("/tmp/floorplans"));
 	echo "OK: Got floorplan and marker data.\n";
 
 	//Create the floorplan skeleton

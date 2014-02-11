@@ -4,6 +4,7 @@ class IDC_Tablet_Floorplan_Canvas
 	private $_dropboxService;
 	private $_floorplans;
 	private $_floorplanImages;
+	private $_sizeOfTabletsLongestEdge = 1024;
 
 	public function __construct(IDC_Tablet_Dropbox_Service $dropboxService, Array $floorplans)
 	{
@@ -15,7 +16,7 @@ class IDC_Tablet_Floorplan_Canvas
 	{
 		foreach($this->_floorplans as $floorplan)
 		{
-			$this->_floorplanImages[$floorplan->getName()]['image'] = $floorplan->getImage('_L');
+			$this->_floorplanImages[$floorplan->getName()]['image'] = $floorplan->getImage();
 			$this->_floorplanImages[$floorplan->getName()]['siteId'] = $floorplan->getSiteId();
 		}
 	}
@@ -32,11 +33,12 @@ class IDC_Tablet_Floorplan_Canvas
 				$backgroundImage = $this->_floorplanImages[$floorplan->getName()]['image'];
 				$markerIcon = $marker->getIcon();
 				$markerCoordinates = $marker->getCoordinates();
+				$scaleFactor = $this->_getScaleFactor($backgroundImage);
 				imagecopy(
 					$backgroundImage,
 					$markerIcon,
-					($markerCoordinates['x'] * 1.99) - ($markerIconWidth / 2),
-					($markerCoordinates['y'] * 1.99) - ($markerIconHeight / 2),
+					($markerCoordinates['x'] * $scaleFactor) - ($markerIconWidth / 2),
+					($markerCoordinates['y'] * $scaleFactor) - ($markerIconHeight / 2),
 					0,
 					0,
 					$markerIconWidth,
@@ -59,5 +61,19 @@ class IDC_Tablet_Floorplan_Canvas
 			//upload the floorplan to dropbox
 			$this->_dropboxService->uploadFloorplanImage($tmpFloorplanImagePath, $values['siteId']);
 		}
+	}
+
+	private function _getScaleFactor($backgroundImage)
+	{
+		$backgroundImageWidth = Imagesx($backgroundImage);
+		$backgroundImageHeight = Imagesy($backgroundImage);
+
+		if ($backgroundImageWidth > $backgroundImageHeight) {
+  			$out = $backgroundImageWidth / $this->_sizeOfTabletsLongestEdge;
+		} else {
+			$out = $backgroundImageHeight / $this->_sizeOfTabletsLongestEdge;
+		}
+		
+		return $out;
 	}
 }
