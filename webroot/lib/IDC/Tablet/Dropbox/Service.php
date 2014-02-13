@@ -59,9 +59,7 @@ class IDC_Tablet_Dropbox_Service
         //construct all possible floorplan image paths
         foreach($floorplanImageNames as $floorplanImageName)
         {
-            $floorplanImageNameParts = explode('.', $floorplanImageName);
-            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . '.' . $floorplanImageNameParts[1];
-            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . '_L.' . $floorplanImageNameParts[1];
+            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageName;
         }
 
         //verify all floorplan images exist
