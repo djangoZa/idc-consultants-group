@@ -1,6 +1,6 @@
 <?php
-error_reporting(E_ERROR);
-ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 require_once dirname(__FILE__) . "/../lib/bootstrap.php";
 
@@ -11,22 +11,18 @@ $tabletFloorPlanService = Container::get('IDC_Tablet_FloorPlan_Service');
 
 echo "OK: Start\n";
 
-echo "OK: Fetching tablet outputs for site id ($siteId). This may take a few minutes...\n";
+echo "OK: Fetching tablet outputs for site id ($siteId).\n";
 
 $outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
-file_put_contents("/tmp/outputs", serialize($outputs));
-//$outputs = unserialize(file_get_contents("/tmp/outputs"));
 
 if (!empty($outputs))
 {
 	echo "OK: Got tablet outputs.\n";
 
-	echo "OK: Fetching floorplan and marker data from outputs. This may take a few minutes...\n";
+	echo "OK: Fetching floorplan and marker data from outputs.\n";
 	
 	//Fetch the all the floorplans across all data files
 	$floorplans = $tabletFloorPlanService->getFloorPlansFromOutputs($outputs);
-    file_put_contents("/tmp/floorplans", serialize($floorplans));
-	//$floorplans = unserialize(file_get_contents("/tmp/floorplans"));
 	echo "OK: Got floorplan and marker data.\n";
 
 	//Create the floorplan skeleton
@@ -36,7 +32,6 @@ if (!empty($outputs))
 	//Verify all floorplan images have been uploaded
 	echo "OK: Verifying that all required floorplan images have been uploaded.\n";
 	$hasAllRequiredFloorplanImages = $tabletDropboxService->hasAllRequiredFloorplanImages($siteId, $floorplans);
-	//$hasAllRequiredFloorplanImages = array('result' => true);
 
 	if ($hasAllRequiredFloorplanImages['result'] == true)
 	{
@@ -47,8 +42,8 @@ if (!empty($outputs))
 		echo "OK: Flooplan canvas constructed.\n";
 
 		//Generate a JPG representation of the floorplan canvas
+		echo "OK: Generating floorplan images with overlayed markers\n";
 		$tabletFloorPlanService->generateAndSaveOverlayedFloorplans($tabletFloorPlanCanvas);
-		echo "OK: Generated floorplan images with overlayed markers\n";
 
 	} else {
 
@@ -66,5 +61,9 @@ if (!empty($outputs))
 	echo "ERROR: Cant find any uploaded data\n";
 
 }
+
+//clean the tmp directory
+echo "OK: Cleaning temporary directory\n";
+$tabletDropboxService->cleanTmpDirectory();
 
 echo "OK: End\n\n";
