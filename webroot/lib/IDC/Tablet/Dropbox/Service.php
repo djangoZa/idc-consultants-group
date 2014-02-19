@@ -3,8 +3,10 @@ class IDC_Tablet_Dropbox_Service
 {
 	private $_client;
 	private $_tmpFolder = '/tmp/idc-consultants-group';
+    private $_localDropboxPath = "/vagrant/dropbox";
     private $_dropboxPendingTabletUploadsPath =  "/idc-consultants-group/uploads/Pending";
     private $_dropboxProcessedTabletUploadsPath = "/idc-consultants-group/uploads/Processed";
+    private $_dropboxLocalProcessedTabletUploadsPath = "/vagrant/dropbox/idc-consultants-group/uploads/Processed";
     private $_dropboxCorruptedTabletOutputPath = "/idc-consultants-group/uploads/Corrupted";
     private $_processedFolderPath;
     private $_siteFolderPath;
@@ -12,6 +14,15 @@ class IDC_Tablet_Dropbox_Service
     public function __construct(Dropbox\Client $client)
     {
     	$this->_client = $client;
+    }
+
+    public function cleanTmpDirectory()
+    {
+        $folder = $this->_tmpFolder;
+        foreach(glob("{$folder}/*") as $file)
+        {
+            unlink($file);
+        }
     }
 
     public function uploadFloorplanImage($localPath, $siteId)
@@ -37,14 +48,9 @@ class IDC_Tablet_Dropbox_Service
             $floorplanImageName = $floorplan->getImageName();
             $floorplanImageNameParts = explode(".", $floorplanImageName);
             
-            $path = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . $version . '.' . $floorplanImageNameParts[1];
-            
-            $tmpDataFilePath = $this->_tmpFolder . "/image-" . uniqid();
-            $fileHandle = fopen($tmpDataFilePath, "w+b");
-            $fileMetadata = $this->_client->getFile($path, $fileHandle);
-            fclose($fileHandle);
+            $path = $this->_dropboxLocalProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageNameParts[0] . $version . '.' . $floorplanImageNameParts[1];
 
-            $out[$version] = $tmpDataFilePath;
+            $out[$version] = $path;
         }
 
         return $out;
@@ -82,7 +88,6 @@ class IDC_Tablet_Dropbox_Service
         $this->_client->createFolder($basePath . '/Floorplans');
         $this->_client->createFolder($basePath . '/Floorplans/Original');
         $this->_client->createFolder($basePath . '/Floorplans/Overlayed');
-        $this->_client->createFolder($basePath . '/Floorplans/Overlayed/Backups');
     }
 
     public function getOutputsBySiteId($siteId)
@@ -145,27 +150,14 @@ class IDC_Tablet_Dropbox_Service
 
     public function getFileContents($path)
     {
-        $out = '';
-
-        $tmpDataFilePath = $this->_tmpFolder . "/data-" . uniqid() . ".txt";
-        $fileHandle = fopen($tmpDataFilePath, "w+b");
-        $fileMetadata = $this->_client->getFile($path, $fileHandle);
-        fclose($fileHandle);
-
-        $out = file_get_contents($tmpDataFilePath);
-
+        $out = file_get_contents($this->_localDropboxPath . $path);
         return $out;
     }
 
     public function getFloorplanImageDimensions($siteId, $floorplanImageName)
     {
-        $path = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageName;
-        $tmpDataFilePath = $this->_tmpFolder . "/image-" . uniqid();
-        $fileHandle = fopen($tmpDataFilePath, "w+b");
-        $fileMetadata = $this->_client->getFile($path, $fileHandle);
-        fclose($fileHandle);
-
-        $result = getimagesize($tmpDataFilePath);
+        $path = $this->_dropboxLocalProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageName;
+        $result = getimagesize($path);
 
         return array(
             'width' => $result[0],
