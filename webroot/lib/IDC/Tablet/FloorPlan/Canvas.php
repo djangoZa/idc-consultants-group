@@ -46,8 +46,6 @@ class IDC_Tablet_Floorplan_Canvas
 				);
 			}
 		}
-
-		
 	}
 
 	public function saveFloorplansToDropbox()
@@ -66,14 +64,7 @@ class IDC_Tablet_Floorplan_Canvas
 	private function _getScaleFactor($backgroundImage)
 	{
 		$backgroundImageWidth = Imagesx($backgroundImage);
-		$backgroundImageHeight = Imagesy($backgroundImage);
-
-		if ($backgroundImageWidth > $backgroundImageHeight) {
-  			$out = $backgroundImageWidth / $this->_sizeOfTabletsLongestEdge;
-		} else {
-			$out = $backgroundImageHeight / $this->_sizeOfTabletsLongestEdge;
-		}
-		
+  	    $out = $backgroundImageWidth / $this->_sizeOfTabletsLongestEdge;
 		return $out;
 	}
 }

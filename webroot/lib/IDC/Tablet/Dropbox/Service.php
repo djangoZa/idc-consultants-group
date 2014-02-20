@@ -27,13 +27,8 @@ class IDC_Tablet_Dropbox_Service
 
     public function uploadFloorplanImage($localPath, $siteId)
     {
-        $fileHandle = fopen($localPath, "rb");
-        $path = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . "/Floorplans/Overlayed/" . basename($localPath);
-        
-        try{
-            $this->_client->uploadFile($path, Dropbox\WriteMode::add(), $fileHandle);
-            fclose($fileHandle);
-        } catch(Exception $e) {}
+        $path = $this->_localDropboxPath . $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . "/Floorplans/Overlayed/" . basename($localPath);
+        rename($localPath, $path);
     }
 
     public function getFloorplanImagePathsByFloorplan(IDC_Tablet_Floorplan $floorplan)
@@ -65,13 +60,13 @@ class IDC_Tablet_Dropbox_Service
         //construct all possible floorplan image paths
         foreach($floorplanImageNames as $floorplanImageName)
         {
-            $paths[] = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageName;
+            $paths[] = $this->_localDropboxPath . $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId . '/Floorplans/Original/' . $floorplanImageName;
         }
 
         //verify all floorplan images exist
         foreach ($paths as $path)
         {
-            $result = $this->_client->getMetaData($path);
+            $result = is_file($path);
             if (empty($result))
             {
                 $out['result'] = false;
@@ -84,16 +79,31 @@ class IDC_Tablet_Dropbox_Service
 
     public function createFloorplanFolderSkeleton($siteId)
     {
-        $basePath = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId;
-        $this->_client->createFolder($basePath . '/Floorplans');
-        $this->_client->createFolder($basePath . '/Floorplans/Original');
-        $this->_client->createFolder($basePath . '/Floorplans/Overlayed');
+        $basePath = $this->_localDropboxPath . $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId;
+        $floorplansPath  = $basePath . '/Floorplans';
+        $originalPath = $floorplansPath . '/Original';
+        $overlayedPath = $floorplansPath . '/Overlayed';
+
+        if (!is_dir($floorplansPath))
+        {
+            mkdir($floorplansPath, 1777, $recursive = true);
+        }
+
+        if (!is_dir($originalPath))
+        {
+            mkdir($originalPath, 1777, $recursive = true);
+        }
+
+        if (!is_dir($overlayedPath))
+        {
+            mkdir($overlayedPath, 1777, $recursive = true);
+        }
     }
 
     public function getOutputsBySiteId($siteId)
     {
         $out = array();
-        $path = $this->_dropboxProcessedTabletUploadsPath . "/$siteId/Data";
+        $path = $this->_localDropboxPath . $this->_dropboxProcessedTabletUploadsPath . "/$siteId/Data";
         $outputs = $this->_getFolderContents($path);
 
         if (!empty($outputs))
@@ -113,7 +123,7 @@ class IDC_Tablet_Dropbox_Service
     public function hasPendingTabletOutputs()
     {
         $out = false;
-        $tablets = $this->_getFolderContents($this->_dropboxPendingTabletUploadsPath);
+        $tablets = $this->_getFolderContents($this->_localDropboxPath . $this->_dropboxPendingTabletUploadsPath);
 
         foreach($tablets as $tablet)
         {
@@ -133,7 +143,7 @@ class IDC_Tablet_Dropbox_Service
     public function getPendingFolders()
     {
         $out = array();
-        $tablets = $this->_getFolderContents($this->_dropboxPendingTabletUploadsPath);
+        $tablets = $this->_getFolderContents($this->_localDropboxPath . $this->_dropboxPendingTabletUploadsPath);
 
         foreach($tablets as $tablet)
         {
@@ -150,7 +160,7 @@ class IDC_Tablet_Dropbox_Service
 
     public function getFileContents($path)
     {
-        $out = file_get_contents($this->_localDropboxPath . $path);
+        $out = file_get_contents($path);
         return $out;
     }
 
@@ -175,7 +185,7 @@ class IDC_Tablet_Dropbox_Service
     public function movePendingFolderToCorruptedFolder(IDC_Tablet_Dropbox_Folder $folder)
     {
         $folderName = basename($folder->getPath() . "_" . uniqid());
-        $this->_client->move($folder->getPath(), $this->_dropboxCorruptedTabletOutputPath . '/' . $folderName);
+        rename($folder->getPath(), $this->_localDropboxPath . $this->_dropboxCorruptedTabletOutputPath . '/' . $folderName);
     }
 
     private function _sortContentsByPath($array, $key)
@@ -203,7 +213,7 @@ class IDC_Tablet_Dropbox_Service
     private function _movePendingFolderToDataDumpFolder(IDC_Tablet_Dropbox_Folder $folder)
     {
         $this->_setProcessedFolderPath($folder);
-        $this->_client->move($folder->getPath(), $this->_processedFolderPath);
+        rename($folder->getPath(), $this->_processedFolderPath);
     }
 
     private function _setProcessedFolderPath(IDC_Tablet_Dropbox_Folder $folder)
@@ -214,23 +224,43 @@ class IDC_Tablet_Dropbox_Service
 
     private function _createDataDumpFolder($siteId)
     {
+        $path = $this->_siteFolderPath . '/Data';
+
         //create data directory
-        $this->_client->createFolder($this->_siteFolderPath . '/Data');
+        if (!is_dir($path))
+        {
+            mkdir($path, 1777, $recursive = true);
+        }
     }
 
     private function _createSiteFolder($siteId)
     {
         //define the path for the site folder
-        $this->_siteFolderPath = $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId;
+        $this->_siteFolderPath = $this->_localDropboxPath . $this->_dropboxProcessedTabletUploadsPath . '/' . $siteId;
 
         //create the site folder if it doesnt exist
-        $this->_client->createFolder($this->_siteFolderPath);
+        if (!is_dir($this->_siteFolderPath))
+        {
+            mkdir($this->_siteFolderPath, 1777, $recursive = true);
+        }
     }
 
     private function _getFolderContents($folderPath)
     {
-        $folderMetadata = $this->_client->getMetadataWithChildren($folderPath);
-        $out = $this->_sortContentsByPath($folderMetadata['contents'], 'path');
+        $contents = array();
+        $folders = scandir($folderPath);
+        foreach ($folders as $folder)
+        {
+            if ($folder === '.' or $folder === '..') continue;
+
+            $newPath = $folderPath . '/' . $folder;
+            if (is_dir($newPath))
+            {
+                $contents[] = array('path' => $newPath);
+            }
+        }
+
+        $out = $this->_sortContentsByPath($contents, 'path');
         return $out;
     }
 

@@ -4,9 +4,6 @@ ini_set('display_errors', 0);
 
 require_once dirname(__FILE__) . "/../lib/bootstrap.php";
 
-$accessToken = "hhEvuMaZfGEAAAAAAAAAAbdMwClYVaAQ9NVk57Xn134SdsWsawf3eHHyvGkUC405";
-$dbxClient = new Dropbox\Client($accessToken, "PHP-Example/1.0");
-
 $options = getopt("s:");
 $siteId = $options['s'];
 $tabletDropboxService = Container::get('IDC_Tablet_Dropbox_Service');
@@ -18,9 +15,7 @@ echo "OK: Start\n";
 
 echo "OK: Fetching tablet outputs for site id ($siteId).\n";
 
-//$outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
-//file_put_contents("/tmp/outputs", serialize($outputs)); die();
-$outputs = unserialize(file_get_contents("/tmp/outputs"));
+$outputs = $tabletDropboxService->getOutputsBySiteId($siteId);
 
 echo "OK: Fetching floorplans from outputs.\n";
 

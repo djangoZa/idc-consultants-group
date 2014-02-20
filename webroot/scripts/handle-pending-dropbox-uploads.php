@@ -1,5 +1,5 @@
 <?php
-error_reporting(E_ERROR);
+error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once dirname(__FILE__) . "/../lib/bootstrap.php";
@@ -51,6 +51,10 @@ if ($tabletDropboxService->hasPendingTabletOutputs())
 
         }
 	}
+} else {
+
+    echo "OK: No pending tablet outputs found\n";
+    
 }
 	
-echo "OK: End\n";
+echo "OK: End\n\n";

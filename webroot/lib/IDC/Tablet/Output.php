@@ -24,7 +24,10 @@ class IDC_Tablet_Output
 
 		if (!empty($this->_output->floorplans))
 		{
-			$floorplan = Container::get('IDC_Tablet_FloorPlan', array(array_pop($this->_output->floorplans)));
+			$floorplan = array_pop($this->_output->floorplans);
+			$floorplan->folder = $this->_folderName;
+			
+			$floorplan = Container::get('IDC_Tablet_FloorPlan', array($floorplan));
 			$id = $floorplan->getSiteId();
 		}
 		
