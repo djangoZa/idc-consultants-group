@@ -3,6 +3,7 @@ class IDC_Tablet_Output
 {
 	private $_dropboxService;
 	private $_folder;
+	private $_folderName;
 	private $_output;
 
 	public function __construct(IDC_Tablet_Dropbox_Service $dropboxService)
@@ -13,6 +14,7 @@ class IDC_Tablet_Output
 	public function setFolder(IDC_Tablet_Dropbox_Folder $folder)
 	{
 		$this->_folder = $folder;
+		$this->_folderName = $folder->getBasename();
 		$this->_setOutput();
 	}
 
@@ -35,6 +37,9 @@ class IDC_Tablet_Output
 
 		foreach ($this->_output->floorplans as $floorplan)
 		{
+			//add the folder name to the floorplan
+			$floorplan->folder = $this->_folderName;
+
 			//make new tablet floorplan object
 			$tabletFloorplan = Container::get('IDC_Tablet_FloorPlan', array($floorplan));
 			

@@ -8,6 +8,7 @@ class IDC_Tablet_Marker
     private $_y;
     private $_markerIconsPath = '/vagrant/webroot/assets/img/marker_icons';
     private $_markerFontPath = '/vagrant/webroot/assets/fonts/interstate-black.ttf';
+    private $_folder;
 
     public function __construct($options = array()) 
     {
@@ -15,6 +16,7 @@ class IDC_Tablet_Marker
     	$this->_answers = $options->answers;
         $this->_x = $options->x;
         $this->_y = $options->y;
+        $this->_folder = $options->folder;
     }
 
     public function setId($value)
@@ -33,7 +35,8 @@ class IDC_Tablet_Marker
 
     	foreach ($this->_answers as $answer)
     	{
-    		$out[] = new ID_Tablet_Answer($answer);
+            $answer->folder = $this->_folder;
+    		$out[] = new IDC_Tablet_Answer($answer);
     	}
 
     	return $out;

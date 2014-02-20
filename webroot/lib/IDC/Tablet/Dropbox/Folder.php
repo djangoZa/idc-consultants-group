@@ -32,6 +32,11 @@ class IDC_Tablet_Dropbox_Folder
 		return $this->_path;
 	}
 
+	public function getBaseName()
+	{
+		return basename($this->_path);
+	}
+
 	public function getDataFilePath()
 	{
 		$out = $this->_path . '/data.txt';

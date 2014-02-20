@@ -21,3 +21,7 @@ require_once(dirname(__FILE__) . '/IDC/Tablet/Floorplan/Service.php');
 
 //container
 require_once dirname(__FILE__) . '/Container.php';
+
+//php excel
+require_once dirname(__FILE__) . '/PHPExcel.php';
+require_once dirname(__FILE__) . '/PHPExcel/Writer/Excel2007.php';

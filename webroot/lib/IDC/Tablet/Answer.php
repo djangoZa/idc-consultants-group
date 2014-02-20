@@ -10,11 +10,22 @@ class IDC_Tablet_Answer
     	$this->_photos = $options->photos;
     	$this->_feedback = $options->feedback;
     	$this->_comment = $options->comment;
+        $this->_folder = $options->folder;
     }
 
     public function getPhotos()
     {
-    	return $this->_photos;
+        $out = array();
+
+        foreach($this->_photos as $photo)
+        {
+            $out[] = array(
+                'name' => basename($photo),
+                'folder' => $this->_folder
+            );
+        }
+
+    	return $out;
     }
 
     public function getFeedback()

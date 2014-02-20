@@ -6,12 +6,14 @@ class IDC_Tablet_FloorPlan
     private $_imageName;
     private $_imagePaths = array();
     private $_markers;
+    private $_folder;
     
     public function __construct($options = array())
     {
     	$this->_name = $options->name;
         $this->_imageName = basename($options->path);
     	$this->_markers = $options->markers;
+        $this->_folder = $options->folder;
     }
 
     public function setMarkers(Array $markers)
@@ -41,13 +43,14 @@ class IDC_Tablet_FloorPlan
     {
     	$out = array();
 
-    	foreach($this->_markers as $marker)
+    	foreach($this->_markers as $key => $marker)
     	{
             if($marker instanceof IDC_Tablet_Marker)
             {
-                $out[] = $marker;
+                $out[$key] = $marker;
             } else {
-                $out[] = new IDC_Tablet_Marker($marker);    
+                $marker->folder = $this->_folder;
+                $out[$key] = new IDC_Tablet_Marker($marker);    
             }
             
     	}
