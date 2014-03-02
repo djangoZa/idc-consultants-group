@@ -39,6 +39,7 @@ foreach ($floorplans as $floorPlan)
 	        	'Onsite_Images' => $answer->getPhotos(),
 	        	'SANS_Compliance' => $answer->getFeedback(),
 	        	'Comments' => $answer->getComment(),
+                'Units' => $answer->getUnits(),
 	        	'SANS_Recommendations' => '',
 	        	'Optional_Recommendations' => '',
 	        	'QS_SANS_Costing' => '',
@@ -70,6 +71,20 @@ foreach ($rows as $rowId => $row)
     {
     	$columnIndex = array_search($columnId, array_keys($row));
     	$cellIndex = $columns[$columnIndex] . ($rowId + 2);
+
+        //Set the zebra stripes on alternate cells
+        if($rowId % 2)
+        {
+            $objPHPExcel->getDefaultStyle()->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
+            $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getFill()->applyFromArray(
+                array(
+                    'type'       => PHPExcel_Style_Fill::FILL_SOLID,
+                    'startcolor' => array('rgb' => 'E9E9E9'),
+                )
+            );
+        }
+
     	switch($columnId)
     	{
     		case '#':
@@ -132,6 +147,12 @@ $columnNames = array_keys(array_pop($rows));
 
 $objPHPExcel->getDefaultStyle()->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
+$objPHPExcel->getActiveSheet()->getPageSetup()->setPaperSize(PHPExcel_Worksheet_PageSetup::PAPERSIZE_A3);
+$objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(PHPExcel_Worksheet_PageSetup::ORIENTATION_LANDSCAPE);
+$objPHPExcel->getActiveSheet()->getPageMargins()->setTop(0);
+$objPHPExcel->getActiveSheet()->getPageMargins()->setBottom(0);
+$objPHPExcel->getActiveSheet()->getPageMargins()->setLeft(0);
+$objPHPExcel->getActiveSheet()->getPageMargins()->setRight(0);
 
 foreach($columnNames as $columnId => $columnName)
 {
@@ -148,13 +169,11 @@ foreach($columnNames as $columnId => $columnName)
         case 'QS_Optional_Costing':
         case 'Comments':
         case 'SANS_Compliance':
-            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(50);
+            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(20);
             $objPHPExcel->getActiveSheet()->getStyle($cellIndex . ':' . $columnLetter . $objPHPExcel->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
             break;
         case 'Onsite_Images':
-
-            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(30);
-
+            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(25);
             //size the height based on the images
             foreach ($rows as $rowId => $row)
             {
@@ -177,6 +196,9 @@ foreach($columnNames as $columnId => $columnName)
                 }
             }
 
+            break;
+        case 'Section':
+            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(17);
             break;
         default;
             $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setAutoSize(true);
