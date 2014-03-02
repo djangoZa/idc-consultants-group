@@ -80,7 +80,7 @@ foreach ($rows as $rowId => $row)
             $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getFill()->applyFromArray(
                 array(
                     'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                    'startcolor' => array('rgb' => 'E9E9E9'),
+                    'startcolor' => array('rgb' => 'F3F3F3'),
                 )
             );
         }
