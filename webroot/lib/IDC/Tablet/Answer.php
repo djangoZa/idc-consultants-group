@@ -4,6 +4,7 @@ class IDC_Tablet_Answer
     private $_photos;
     private $_feedback;
     private $_comment;
+    private $_units;
 
     public function __construct($options = array())
     {
@@ -11,6 +12,7 @@ class IDC_Tablet_Answer
     	$this->_feedback = $options->feedback;
     	$this->_comment = $options->comment;
         $this->_folder = $options->folder;
+        $this->_units = $options->units;
     }
 
     public function getPhotos()
@@ -36,5 +38,10 @@ class IDC_Tablet_Answer
     public function getComment()
     {
     	return $this->_comment;
+    }
+
+    public function getUnits()
+    {
+        return $this->_units;
     }
 }
