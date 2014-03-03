@@ -80,7 +80,7 @@ foreach ($rows as $rowId => $row)
             $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getFill()->applyFromArray(
                 array(
                     'type'       => PHPExcel_Style_Fill::FILL_SOLID,
-                    'startcolor' => array('rgb' => 'F3F3F3'),
+                    'startcolor' => array('rgb' => 'd8d8d8'),
                 )
             );
         }
@@ -183,6 +183,23 @@ foreach($columnNames as $columnId => $columnName)
             break;
     }
 
+    //Set the background to dark grey
+    $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getFill()->applyFromArray(
+        array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'startcolor' => array('rgb' => 'a5a5a5'),
+        )
+    );
+
+    //Set the borders
+    $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->applyFromArray(array(
+        'borders' => array(
+            'allborders' => array(
+                'style' => PHPExcel_Style_Border::BORDER_THIN,
+                'color' => array('argb' => '000000')
+            )
+        )
+    ));
 }
 
 //Make sure all rows have the correct height
@@ -224,6 +241,16 @@ foreach ($rows as $rowId => $row)
 
                 break;
         }
+
+        //set the cells borders
+        $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->applyFromArray(array(
+            'borders' => array(
+                'allborders' => array(
+                    'style' => PHPExcel_Style_Border::BORDER_THIN,
+                    'color' => array('argb' => '000000')
+                )
+            )
+        ));
     }
 
     $lettersPerLine = 10;
