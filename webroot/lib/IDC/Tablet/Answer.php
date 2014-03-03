@@ -12,7 +12,7 @@ class IDC_Tablet_Answer
     	$this->_feedback = $options->feedback;
     	$this->_comment = $options->comment;
         $this->_folder = $options->folder;
-        $this->_units = $options->units;
+        $this->_units = $options->value;
     }
 
     public function getPhotos()
