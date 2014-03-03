@@ -37,9 +37,9 @@ foreach ($floorplans as $floorPlan)
 	        	'#' => $marker->getId(),
 	        	'Section' => $marker->getSection(),
 	        	'Onsite_Images' => $answer->getPhotos(),
+                'Units' => $answer->getUnits(),
 	        	'SANS_Compliance' => $answer->getFeedback(),
 	        	'Comments' => $answer->getComment(),
-                'Units' => $answer->getUnits(),
 	        	'SANS_Recommendations' => '',
 	        	'Optional_Recommendations' => '',
 	        	'QS_SANS_Costing' => '',
@@ -174,28 +174,6 @@ foreach($columnNames as $columnId => $columnName)
             break;
         case 'Onsite_Images':
             $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(25);
-            //size the height based on the images
-            foreach ($rows as $rowId => $row)
-            {
-                $height = 0;
-                $cellIndex = $columnLetter . $rowId;
-
-                if(isset($images[$cellIndex]))
-                {
-                    $cellImages = $images[$cellIndex];
-
-                    foreach ($cellImages as $cellImage)
-                    {
-                        $height += $cellImage['height'];
-                    }
-                    
-                    if ($height > 0)
-                    {
-                        $objPHPExcel->getActiveSheet()->getRowDimension($rowId)->setRowHeight($height);
-                    }     
-                }
-            }
-
             break;
         case 'Section':
             $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(17);
@@ -205,6 +183,60 @@ foreach($columnNames as $columnId => $columnName)
             break;
     }
 
+}
+
+//Make sure all rows have the correct height
+foreach ($rows as $rowId => $row)
+{
+    $longestCommentString = '';
+    $totalImageHeight = 0;
+    $totalImages = 0;
+    $realRowId = $rowId + 2;
+    $imageHeightScaleMultiplier = 0.755;
+
+    foreach($row as $columnId => $value)
+    {
+        $columnIndex = array_search($columnId, array_keys($row));
+        $cellIndex = $columns[$columnIndex] . ($realRowId);
+
+        switch ($columnId)
+        {
+            case 'SANS_Recommendations':
+            case 'Optional_Recommendations':
+            case 'QS_SANS_Costing':
+            case 'QS_Optional_Costing':
+            case 'Comments':
+            case 'SANS_Compliance':
+                $commentString = $objPHPExcel->getActiveSheet()->getCell($cellIndex)->getValue();
+                if(strlen($commentString) > strlen($longestCommentString)){
+                    $longestCommentString = $commentString;
+                }
+                break;
+            case 'Onsite_Images':
+                if(isset($images[$cellIndex]))
+                {
+                    $cellImages = $images[$cellIndex];
+                    $totalImages = count($cellImages);
+                    foreach ($cellImages as $cellImage) {
+                        $totalImageHeight += $cellImage['height'] * $imageHeightScaleMultiplier;
+                    }
+                }
+
+                break;
+        }
+    }
+
+    $lettersPerLine = 10;
+    $pixelsPerLine = 7.5;
+    $linesForLongestCommentString = strlen($longestCommentString) / $lettersPerLine;
+    $heightOfCellForLongestCommentString = $linesForLongestCommentString * $pixelsPerLine;
+
+    //set the height of the cell
+    if ($totalImageHeight > $heightOfCellForLongestCommentString) {
+        $objPHPExcel->getActiveSheet()->getRowDimension($realRowId)->setRowHeight($totalImageHeight); 
+    } else {
+        $objPHPExcel->getActiveSheet()->getRowDimension($realRowId)->setRowHeight(-1); 
+    }
 }
 
 echo "OK: Writing Excel file.\n";
