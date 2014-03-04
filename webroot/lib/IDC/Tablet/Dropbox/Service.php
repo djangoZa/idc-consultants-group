@@ -4,10 +4,10 @@ class IDC_Tablet_Dropbox_Service
 	private $_client;
 	private $_tmpFolder = '/tmp/idc-consultants-group';
     private $_localDropboxPath = "/vagrant/dropbox";
-    private $_dropboxPendingTabletUploadsPath =  "/idc-consultants-group/uploads/Pending";
-    private $_dropboxProcessedTabletUploadsPath = "/idc-consultants-group/uploads/Processed";
-    private $_dropboxLocalProcessedTabletUploadsPath = "/vagrant/dropbox/idc-consultants-group/uploads/Processed";
-    private $_dropboxCorruptedTabletOutputPath = "/idc-consultants-group/uploads/Corrupted";
+    private $_dropboxPendingTabletUploadsPath =  "/Pending";
+    private $_dropboxProcessedTabletUploadsPath = "/Processed";
+    private $_dropboxLocalProcessedTabletUploadsPath = "/vagrant/dropbox/Processed";
+    private $_dropboxCorruptedTabletOutputPath = "/Corrupted";
     private $_processedFolderPath;
     private $_siteFolderPath;
 
