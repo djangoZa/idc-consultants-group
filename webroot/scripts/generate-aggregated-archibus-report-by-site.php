@@ -9,7 +9,7 @@ $siteId = $options['s'];
 $tabletDropboxService = Container::get('IDC_Tablet_Dropbox_Service');
 $tabletFloorPlanService = Container::get('IDC_Tablet_FloorPlan_Service');
 
-$dropboxSiteBasePath = '/vagrant/dropbox/idc-consultants-group/uploads/Processed/' . $siteId;
+$dropboxSiteBasePath = '/vagrant/dropbox/Processed/' . $siteId;
 
 echo "OK: Start\n";
 
