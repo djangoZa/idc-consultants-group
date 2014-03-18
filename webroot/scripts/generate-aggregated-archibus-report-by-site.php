@@ -214,7 +214,7 @@ foreach ($rows as $rowId => $row)
     $totalImageHeight = 0;
     $totalImages = 0;
     $realRowId = ($rowId == 0) ? 2 : $rowId + 2;
-    $imageHeightScaleMultiplier = 0.76;
+    $imageHeightScaleMultiplier = 0.785;
 
     foreach($row as $columnId => $value)
     {
