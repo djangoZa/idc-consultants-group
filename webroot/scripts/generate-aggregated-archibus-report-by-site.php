@@ -32,19 +32,22 @@ foreach ($floorplans as $floorPlan)
 
         foreach($answers as $answer)
         {
-	        $rows[] = array(
-	        	'Floor_Plan' => $floorPlan->getName(),
-	        	'#' => $marker->getId(),
-	        	'Section' => $marker->getSection(),
-	        	'Onsite_Images' => $answer->getPhotos(),
-                'Units' => $answer->getUnits(),
-	        	'SANS_Compliance' => $answer->getFeedback(),
-	        	'Comments' => $answer->getComment(),
-	        	'SANS_Recommendations' => '',
-	        	'Optional_Recommendations' => '',
-	        	'QS_SANS_Costing' => '',
-				'QS_Optional_Costing' => ''
-	        );	
+            if($floorPlan->getSiteId() == $siteId)
+            {
+    	        $rows[] = array(
+    	        	'Floor_Plan' => $floorPlan->getName(),
+    	        	'#' => $marker->getId(),
+    	        	'Section' => $marker->getSection(),
+    	        	'Onsite_Images' => $answer->getPhotos(),
+                    'Units' => $answer->getUnits(),
+    	        	'SANS_Compliance' => $answer->getFeedback(),
+    	        	'Comments' => $answer->getComment(),
+    	        	'SANS_Recommendations' => '',
+    	        	'Optional_Recommendations' => '',
+    	        	'QS_SANS_Costing' => '',
+    				'QS_Optional_Costing' => ''
+    	        );
+            }
         }
 	}
 }
@@ -113,9 +116,9 @@ foreach ($rows as $rowId => $row)
 		                    $objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 
                             //set the image offset
-                            $size = getimagesize($tmpImageFilePath);
+                            $previousImageIndex = count($images[$cellIndex]) - 1;
                             $height = $objDrawing->getHeight();
-                            $offset = ($key == 0)? 0 : $offset + $height + 2;
+                            $offset = ($key > 0) ? $offset + $images[$cellIndex][$previousImageIndex]['height'] : 0;
                             $objDrawing->setOffsetY(($key > 0) ? $offset : 0);
 
                             $images[$cellIndex][] = array(
@@ -143,7 +146,7 @@ foreach ($rows as $rowId => $row)
 }
 
 //Add the headings and format cells
-$columnNames = array_keys(array_pop($rows));
+$columnNames = array_keys($rows[0]);
 
 $objPHPExcel->getDefaultStyle()->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_TOP);
@@ -160,6 +163,8 @@ foreach($columnNames as $columnId => $columnName)
     $cellIndex =  $columnLetter . '1';
     $objPHPExcel->getActiveSheet()->SetCellValue($cellIndex, str_replace('_', ' ', $columnName));
     $objPHPExcel->getActiveSheet()->getStyle($cellIndex)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setAutoSize(false);
+
 
     switch ($columnName)
     {
@@ -173,10 +178,10 @@ foreach($columnNames as $columnId => $columnName)
             $objPHPExcel->getActiveSheet()->getStyle($cellIndex . ':' . $columnLetter . $objPHPExcel->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
             break;
         case 'Onsite_Images':
-            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(25);
+            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(28.5714286);
             break;
         case 'Section':
-            $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setWidth(17);
+            $objPHPExcel->getActiveSheet()->getStyle($cellIndex . ':' . $columnLetter . $objPHPExcel->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
             break;
         default;
             $objPHPExcel->getActiveSheet()->getColumnDimension($columnLetter)->setAutoSize(true);
@@ -208,8 +213,8 @@ foreach ($rows as $rowId => $row)
     $longestCommentString = '';
     $totalImageHeight = 0;
     $totalImages = 0;
-    $realRowId = $rowId + 2;
-    $imageHeightScaleMultiplier = 0.755;
+    $realRowId = ($rowId == 0) ? 2 : $rowId + 2;
+    $imageHeightScaleMultiplier = 0.76;
 
     foreach($row as $columnId => $value)
     {
